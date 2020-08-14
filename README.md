@@ -1,9 +1,34 @@
-# Fine-Grained_Car_Make_and_Model_Classification_with_Transfer_Learning_and_BCNNs
+# Fine-Grained Car Make and Model Classification with Transfer Learning and BCNNs
 In this project we explore fine-grained car make and model classification on the Stanford Cars Data Set. We first experiment with fine-tuning some of the more famous CNN architectures such as VGG, Resnet, and Densenet. After doing this analysis we build various structured ensembles of these fine-tuned models and analyze how they are able to support each other during classification. Finally we explore the concept of bilinear convolutional neural networks (BCNNs) which take into consideration not only spatial locality within images but also feature location.
 
-Virtual environment creation steps:
+## Virtual environment creation:
+Assuming [Anaconda](https://www.anaconda.com/) is installed the following steps can be taken to create a conda virtual environment for this project. Note that the local system used for development had access to a GeForce GTX 1060 GPU with CUDA version 10.2, thus if the PyTorch install command may vary based on CUDA version. Please see [PyTorch installation](https://pytorch.org/) for more details.
 conda create -n car_classification python=3.7
-conda activate car_classification 
+conda activate car_classification
+conda install pytorch torchvision cudatoolkit=10.2 -c pytorch
+
+## Repo breakdown
+This repository consists of 9 files and 1 folder. The 9 files are as follows:
+* bcnnMain.py:
+* bcnnModel.py:
+* classStats.py:
+* displayLoss.py:
+* labelNames.py:
+* main.py:
+* testEnsemble.py:
+* testModel.py
+* viewImage.py:
+
+The 1 folder is:
+* report:
+
+Note that for the code contained in this repository a user will need to download the [Stanford Cars Dataset](https://ai.stanford.edu/~jkrause/cars/car_dataset.html). This can be done by following the link and locating the "Downloads" section of the page. A user should then download the "Training images", "Testing images", as well as the "devkit". After downloading the three files stated, please unzip them and create a folder within this repository named data while moving all files here. The dataset has not been included within this repository due to space considerations.    
+
+## Viewing all labels in the dataset
+To view all dataset labels please run the following command:
+```
+python labelNames.py
+```
 
 
 README
@@ -11,19 +36,6 @@ README
 Developer: Dillon Pulliam & Hashim Saeed
 Course: 10-707 Topics in Deep Learning
 Date: 3/8/2019
-
-Note that for this code to work a carDevkitfolder must contain the following files:
-  -A folder named devkit containing:
-    1. cars_meta.mat
-    2. cars_test_annos.mat
-    3. cars_test_annos_withlabels.mat
-    4. cars_train_annos.mat
-    5. eval_train.m
-    6. train_perfect_preds.txt
-  -A folder named carsTest containing all jpeg test images
-  -A folder named carsTrain containing all jpeg train images
-
-Dataset can downloaded from the following site: https://ai.stanford.edu/~jkrause/cars/car_dataset.html
 
 To view all labels in the dataset run the following command:
   python3 labelNames.py
