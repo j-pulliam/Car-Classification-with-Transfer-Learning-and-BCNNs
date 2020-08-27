@@ -1,9 +1,17 @@
+#Developer: Dillon Pulliam
+#Date: 8/16/2020
+#Purpose: The purpose of this file is to give the class definition for various BCNN models 
+
+
+#Libraries needed
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
 from torchvision import datasets, models, transforms
 
+
+#Class definition for a BCNN model
 #Source: https://github.com/HaoMood/bilinear-cnn
 class BCNN224(nn.Module):
     """B-CNN for Stanford Cars."""

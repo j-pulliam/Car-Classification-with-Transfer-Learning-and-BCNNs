@@ -1,48 +1,18 @@
 #Libraries used
 import numpy as np
-import scipy.io as sio
 import os
 import cv2
 import matplotlib.pyplot as plt
 import math
 import torch
 import datetime
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader
 from torchvision import datasets, models, transforms
 import torch.nn as nn
 
 from bcnnModel import BCNN448, BCNN224, BCNN
-
-
-class CarDataset(Dataset):
-    """Stanford Cars Dataset."""
-    def __init__(self, root_dir, resizeShape):
-        self.root_dir = root_dir
-        self.resizeShape = resizeShape
-
-    def __len__(self):
-        counter = 0
-        for file in os.listdir(self.root_dir):
-            counter += 1
-        return counter
-
-    def __getitem__(self, idx):
-        imageName = os.listdir(self.root_dir)
-        image = cv2.imread(self.root_dir + "/" + imageName[idx])[:,:,::-1]
-        image = cv2.resize(image,(self.resizeShape[1],self.resizeShape[0]),interpolation=cv2.INTER_LINEAR)
-        return image, imageName[idx]
-
-
-def getLabels(path):
-    annos = sio.loadmat(path)
-    _, total_size = annos["annotations"].shape
-    labels = np.ndarray(shape=(total_size, 2), dtype=object)
-    for i in range(total_size):
-        fname = annos["annotations"][0][i][5][0]
-        classLabel = annos["annotations"][0][i][4][0][0]
-        labels[i,0] = fname
-        labels[i,1] = classLabel
-    return labels
+from dataset import *
+from utils import *
 
 
 def trainModel(trainDataset, testDataset, maxEpochs, batchSize1, batchSize2, resizeShape, trainLabels, testLabels, NN):
@@ -187,49 +157,6 @@ def trainModel(trainDataset, testDataset, maxEpochs, batchSize1, batchSize2, res
             valAcc = valCorrectPredictions/testDatasetLength
         epochIndex += 1
     return
-
-
-def calcCorrectPredictions(outputs, labels):
-    correct = 0
-    predictedLabels = torch.argmax(outputs, dim=1)
-    index = 0
-    while(index < len(labels)):
-        if(predictedLabels[index] == labels[index]):
-            correct += 1
-        index += 1
-    return correct
-
-
-def calcCorrectPredictions5(outputs, labels):
-    correct = 0
-    predictedLabels = torch.topk(outputs, k=5, dim=1)
-    index = 0
-    while(index < len(labels)):
-        index2 = 0
-        while(index2 < len(predictedLabels[1][0])):
-            if(predictedLabels[1][index][index2] == labels[index]):
-                correct += 1
-            index2 += 1
-        index += 1
-    return correct
-
-
-def getImageLabels(names, trainLabels):
-    batchLabelsNumpy = np.zeros(len(names), dtype=int)
-    idx = 0
-    while(idx < len(names)):
-        batchLabelsNumpy[idx] = trainLabels.get(names[idx])
-        idx += 1
-    return torch.from_numpy(batchLabelsNumpy)
-
-
-def buildLabelDictionary(trainLabels):
-    dictionary = {}
-    index = 0
-    while(index < len(trainLabels)):
-        dictionary[trainLabels[index][0]] = trainLabels[index][1]
-        index += 1
-    return dictionary
 
 
 
