@@ -40,125 +40,26 @@ conda install matplotlib
 This repository consists of 9 files and 1 folder. The 9 files are as follows:
 * bcnnMain.py:
 * bcnnModel.py:
-* classStats.py:
 * dataset.py: PyTorch dataset class definition
-* displayLoss.py:
-* labelNames.py: Prints all car labels in the dataset
-* main_cnn.py:
-* testEnsemble.py:
-* testModel.py:
+* display_training_stats.py: Displays the stats from training in a graph
+* label_names.py: Prints all car labels in the dataset
+* main_cnn.py: Trains a CNN over the dataset for a set number of epochs evaluating performance over the test set after each
+* test_cnn.py: Evaluates the final performance of a trained CNN over both the training and test sets
+* test_ensemble.py: Evaluates the performance of an ensemble of three trained CNNs over both the training and test sets
 * utils.py: Utility functions called by numerous files
-* viewImage.py: Views a random image from the training dataset and its corresponding label
+* view_image.py: Views a random image from the training dataset and its corresponding label
 
 The 1 folder is:
-* report: contains the paper written covering the project, "Fine Grained Car Make and Model Classification with Transfer Learning and BCNNs"
-
-Note that for the code contained in this repository a user will need to download the [Stanford Cars Dataset](https://ai.stanford.edu/~jkrause/cars/car_dataset.html). This can be done by following the link and locating the "Downloads" section of the page. A user should then download the "Training images", "Testing images", as well as the "devkit". After downloading the three files stated, please unzip them and create a folder within this repository named data while moving all files here. The dataset has not been included within this repository due to space considerations.    
+* report: contains the paper written covering the project, "Fine Grained Car Make and Model Classification with Transfer Learning and BCNNs"  
 
 ## Viewing all labels in the dataset
 To view all dataset labels please run the following command:
 ```
-python labelNames.py
+python label_names.py
 ```
 
 ## Viewing a random image from the training dataset
 To view a random image from the training dataset run the following command:
 ```
-python viewImage.py
+python view_image.py
 ```
-
-
-README
-
-Developer: Dillon Pulliam & Hashim Saeed
-Course: 10-707 Topics in Deep Learning
-Date: 3/8/2019
-
-To run our main code to train a model and get accuracy and loss values run the following command:
-  python3 main.py
-  -Choose the architecture to train (AlexNet, VGG, Resnet, or DenseNet) by un-commenting the
-  block corresponding to the specific model and commenting out all other blocks. These blocks
-  are located from lines 263-324. Model choices are as follow:
-    VGG11
-    VGG11 BN
-    VGG16
-    VGG16 BN
-    Resnet18
-    Resnet50
-    Resnet152
-    Densenet161
-    AlexNet
-  -This code fine-tunes a pre-trained version of VGG, Resnet, DenseNet, or AlexNet
-  -To train a "from-scratch" version set the pretrained variable within the model to "false"
-  -To fine-tune the entire model edit the "feature_extract" variable on line 253
-    Set "false" to fine-tune the entire model, "true" to train the final fully-connected layer only
-  -To edit the max number of epochs, training set batch size, test set batch size, and image
-  re-size shape edits lines 248-251
-    1. Image re-size shape should be 224x224 unless architectural changes being made
-  -Training can be done using either SGD or Adam as the optimizer, adjust lines 63-64 and 67-68
-  accordingly
-  -Running this command will produce 7 output files:
-  1. NN.pickle: saved version of model
-  2. trainLoss.npy: Keeps track of the training set loss each epoch
-  3. trainAccuracy.npy: Keeps track of the training set accuracy each epoch
-  4. trainAccuracyTop5.npy: Keeps track of the training set top 5 accuracy each epoch
-  5. testLoss.npy: Keeps track of the test set loss each epoch
-  6. testAccuracy.npy: Keeps track of the test set accuracy each epoch
-  7. testAccuracyTop5.npy: Keeps track of the test set top 5 accuracy each epoch
-
-To display a graphic of training stats per epoch run the following code:
-  python3 displayLoss.py
-  -This will create a graph plotting the training and validation set losses and accuracy over each epoch
-
-To get class stats on the test set for a trained model (best / worst classes) run the following:
-  python3 classStats.py
-  -Note: Adjust lines 191-234 based on the model type being loaded in. Un-comment the specific model
-  type trained and comment out all other model types
-
-To test either a trained fine-tuned model or trained BCNN model and get accuracy stats
-on both the training and test sets run the following command:
-  python3 testModel.py
-  -Adjust lines 191-192 based on the re-size shape of images (only use 448x448 for BCNN448)
-  -Adjust lines 202-251 based on the model type being tested. Comment out all models except for the
-  version being tested
-  -If testing a BCNN model adjust lines 243-245 based on the specific architecture and model type
-    1. When testing a BCNN the 2 feature extractors (CNNs) that make it up must also be saved in
-    the current folder
-
-To test an ensemble of 3 fine-tuned networks run the following command:
-  python3 testEnsemble.py
-  -Adjust lines 219-272 based on the 3 model architectures being used. 3 sets of architectures
-  should be left un-commented while all others are commented out
-    1. May also have to adjust model names being loaded in accordingly
-    2. If loading 2 / 3 models of the same type may have to add proper source code (see Resnet152)
-  -Adjust the model names input to the "testEnsemble" function on line 269 based on the models
-  in the ensemble
-
-To run our BCNN main code to train a BCNN model and get accuracy and loss values run the following command:
-  python3 bcnnMain.py
-  -Choose the architecture to train (BCNN, BCNN224, BCNN) by un-commenting the
-  line corresponding to the specific model and commenting out all other lines (259-261)
-  -To edit the max number of epochs, training set batch size, test set batch size, and image
-  re-size shape edits lines 245-249
-    1. Image re-size shape should be 224x224 unless dealing with BCNN448 model
-  -Training can be done using either SGD or Adam as the optimizer, adjust lines 64-65 and 68-69
-  accordingly
-  -When running this code the 2 feature extractors (CNNs) that make up the BCNN must also be saved in
-  the current folder
-  -To use a BCNN with Resnet model type use the BCNN class
-    1. To set feature extractors edit lines 109-111 and 116-118 accordingly in the "bcnnModel.py" file
-    2. To fine-tune only the fully-connected layer un-comment lines 128-131; otherwise entire model is updated
-  -To use a BCNN with VGG model type use the BCNN224 class
-    1. To set feature extractors edit lines 12-17 and 21-26 accordingly in the "bcnnModel.py" file
-    2. To fine-tune only the fully-connected layer un-comment lines 35-38; otherwise entire model is updated
-  -To use a BCNN with 448x448 sized images use the BCNN448 class
-    1. To set feature extractors edit lines 64-66 and 70-72 accordingly in the "bcnnModel.py" file
-    2. To fine-tune only the fully-connected layer un-comment lines 81-84; otherwise entire model is updated
-  -Running this command will produce 7 output files:
-    1. BCNN.pickle: saved version of model
-    2. trainLoss.npy: Keeps track of the training set loss each epoch
-    3. trainAccuracy.npy: Keeps track of the training set accuracy each epoch
-    4. trainAccuracyTop5.npy: Keeps track of the training set top 5 accuracy each epoch
-    5. testLoss.npy: Keeps track of the test set loss each epoch
-    6. testAccuracy.npy: Keeps track of the test set accuracy each epoch
-    7. testAccuracyTop5.npy: Keeps track of the test set top 5 accuracy each epoch

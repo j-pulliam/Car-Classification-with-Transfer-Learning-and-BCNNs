@@ -39,12 +39,14 @@ def train(GPU, NN, dataset, labels, criterion, optimizer, batchSize):
         batchData = transferDevice(GPU, batchData)
         batchLabels = transferDevice(GPU, getImageLabels(batchImageNames, labels))
         #Pass the images through the network, make predictions, compute the loss, add this to the total loss, and
-        #determine the number of correct predicted labels and correct predicted top 5 labels
+        #determine the number of correctly predicted labels and correctly predicted top 5 labels
         output = NN(batchData)
         loss = criterion(output, batchLabels)
         totalLoss += loss.item()
-        correctPredictions += calcCorrectPredictions(output, batchLabels)
-        top5CorrectPredictions += calcCorrectPredictions5(output, batchLabels)
+        batchCorrectPredictions, _ = calcCorrectPredictions(output, batchLabels)
+        batchTop5CorrectPredictions, _ = calcCorrectPredictions5(output, batchLabels)
+        correctPredictions += batchCorrectPredictions
+        top5CorrectPredictions += batchTop5CorrectPredictions
         #Clear gradients from the previous training pass, compute the gradients of this pass, and update the
         #network weights
         optimizer.zero_grad()
@@ -62,12 +64,14 @@ def train(GPU, NN, dataset, labels, criterion, optimizer, batchSize):
 #               NN -> PyTorch neural network class
 #               dataset -> PyTorch dataloader class
 #               labels -> dictionary of file names and their corresponding labels in a dataset
+#               labelNames -> all label names from the dataset
 #               criterion -> PyTorch criterion (such as cross entropy loss)
 #               batchSize -> batch size for testing
 #Output:        loss -> average loss across the test set
 #               accuracy -> accuracy across the test set
 #               top5Accuracy -> top 5 accuracy across the test set
-def test(GPU, NN, dataset, labels, criterion, batchSize):
+#               carStats -> numpy array of stats per label type [label, labelName, accuracyTop1, accuracyTop5, total]
+def test(GPU, NN, dataset, labels, labelNames, criterion, batchSize):
     #Place the network in evaluation mode
     NN.eval()
 
@@ -76,23 +80,35 @@ def test(GPU, NN, dataset, labels, criterion, batchSize):
     correctPredictions = 0
     top5CorrectPredictions = 0
 
-    #Iterate through the dataset training our model
+    #Create variable to store the stats per label type [label, labelName, correctTop1, correctTop5, total]
+    carStats = np.zeros(shape=(len(labelNames), 5), dtype=object)
+    carStats[:,0:2] = labelNames
+
+    #Iterate through the dataset testing our model
     for batchNumber, (batchData, batchImageNames) in enumerate(dataset):
         #Transfer the batch data to the GPU and get the batch labels while also transferring it
         batchData = transferDevice(GPU, batchData)
         batchLabels = transferDevice(GPU, getImageLabels(batchImageNames, labels))
         #Pass the images through the network, make predictions, compute the loss, add this to the total loss, and
-        #determine the number of correct predicted labels and correct predicted top 5 labels
+        #determine the number of correctly predicted labels and correctly predicted top 5 labels along with their batch indices
         output = NN(batchData)
         loss = criterion(output, batchLabels)
         totalLoss += loss.item()
-        correctPredictions += calcCorrectPredictions(output, batchLabels)
-        top5CorrectPredictions += calcCorrectPredictions5(output, batchLabels)
+        batchCorrectPredictions, batchCorrectIndices = calcCorrectPredictions(output, batchLabels)
+        batchTop5CorrectPredictions, batchTop5CorrectIndices = calcCorrectPredictions5(output, batchLabels)
+        correctPredictions += batchCorrectPredictions
+        top5CorrectPredictions += batchTop5CorrectPredictions
+        #Increment the total label counts, correct counts, and top 5 correct counts corresponding to each label in car stats
+        carStats = updateCarStats(carStats, batchLabels, batchCorrectIndices, batchTop5CorrectIndices)
         print("                                                                                             ", end="\r")
         print("Testing batch index: "+str(batchNumber)+"/"+str(len(dataset))+ " ( "+str(batchNumber/len(dataset)*100)+"% )", end="\r")
 
-    #Return the average loss, top prediction accuracy, and top 5 prediction accuracy
-    return totalLoss/len(dataset), correctPredictions/len(labels), top5CorrectPredictions/len(labels)
+    #Convert count stats to accuracy values
+    carStats[:,2] /= carStats[:,4]
+    carStats[:,3] /= carStats[:,4]
+
+    #Return the average loss, top prediction accuracy, top 5 prediction accuracy, and car stats
+    return totalLoss/len(dataset), correctPredictions/len(labels), top5CorrectPredictions/len(labels), carStats
 
 
 
@@ -117,6 +133,27 @@ def getLabels(path):
     #Ensure the index begins at 0
     labels[:,1] -= 1
     return labels
+
+
+#Name:          getLabelNames
+#Purpose:       load all labels from the dataset
+#Inputs:        none
+#Output:        labelNames -> all label names from the dataset
+def getLabelNames():
+    #Load the label names, get the number of labels, and initialize a numpy array to store all labels
+    annos = sio.loadmat('data/car_devkit/devkit/cars_meta.mat')
+    _, total_size = annos["class_names"].shape
+    labelNames = np.ndarray(shape=(total_size, 2), dtype=object)
+
+    #Loop through all labels adding them to the numpy array
+    for i in range(total_size):
+        labelName = annos["class_names"][0][i][0]
+        labelNames[i,0] = i+1
+        labelNames[i,1] = labelName
+
+    #Set the start index to 0
+    labelNames[:,0] = labelNames[:,0] - 1
+    return labelNames
 
 
 #Name:          buildLabelDictionary
@@ -257,48 +294,106 @@ def getImageLabels(names, labels):
 #Purpose:       calculate the number of correct predictions from the model
 #Inputs:        outputs -> output predictions from the model
 #               labels -> true labels
-#Output:        correct -> number of correct predictions
+#Outputs:       correct -> number of correct predictions
+#               correctIndices -> label indices the model predicted correctly
 def calcCorrectPredictions(outputs, labels):
-    #Variable to store the number of correct predictions, get the model class predictions, and loop through all ouputs calculating the number correct
+    #Variable to store the number of correct predictions, variable to store the correct prediction indices, and get the model class predictions
     correct = 0
+    correctIndices = []
     predictedLabels = torch.argmax(outputs, dim=1)
+    #Loop through all ouputs calculating the number correct and storing correct indices
     index = 0
     while(index < len(labels)):
         if(predictedLabels[index] == labels[index]):
             correct += 1
+            correctIndices.append(index)
         index += 1
-    return correct
+    return correct, correctIndices
 
 
 #Name:          calcCorrectPredictions5
 #Purpose:       calculate the number of correct predictions from the model where the correct prediction occurs within the top 5 classes
 #Inputs:        outputs -> output predictions from the model
 #               labels -> true labels
-#Output:        correct -> number of correct predictions within the top 5
+#Outputs:       correct -> number of correct predictions within the top 5
+#               correctIndices -> label indices the model predicted correctly
 def calcCorrectPredictions5(outputs, labels):
-    #Variable to store the number of correct predictions, get the model top 5 class predictions, and loop through all ouputs calculating the number correct top 5 predictions
+    #Variable to store the number of correct predictions, variable to store the correct prediction indices, and get the model top 5 class predictions
     correct = 0
+    correctIndices = []
     predictedLabels = torch.topk(outputs, k=5, dim=1)
+    #Loop through all ouputs calculating the number correct top 5 predictions and storing correct indices
     index = 0
     while(index < len(labels)):
         index2 = 0
         while(index2 < len(predictedLabels[1][0])):
             if(predictedLabels[1][index][index2] == labels[index]):
                 correct += 1
+                correctIndices.append(index)
             index2 += 1
         index += 1
-    return correct
+    return correct, correctIndices
 
 
 #Name:          saveResults
-#Purpose:       save the training / testing results in the numpy array and save it to disk
+#Purpose:       save the training / testing results in the numpy array
 #Inputs:        array -> numpy array to save the epoch index and data to
 #               data -> data to save to the numpy array (loss, accuracy, or top 5 accuracy)
 #               epochIndex -> epoch index for saving
-#               saveName -> name to use for saving the numpy array
 #Output:        array -> numpy array with updated saved data
-def saveResults(array, data, epochIndex, saveName):
+def saveResults(array, data, epochIndex):
     array[epochIndex][0] = epochIndex
     array[epochIndex][1] = data
-    np.save(saveName, array)
     return array
+
+
+#Name:          updateCarStats
+#Purpose:       increment the total label counts, correct counts, and top 5 correct counts corresponding to each label in car stats
+#Inputs:        carStats -> numpy array of stats per label type [label, labelName, correctTop1, correctTop5, total]
+#               batchLabels -> labels for batch of data
+#               correctIndices -> batch label indices the model predicted correctly
+#               top5CorrectIndices -> batch label indices the model predicted correctly in the top 5
+#Output:        carStats -> numpy array of stats per label type [label, labelName, correctTop1, correctTop5, total] updated
+def updateCarStats(carStats, batchLabels, correctIndices, top5CorrectIndices):
+    #Loop through all labels in the batch incrementing the count by 1 in car stats for each seen
+    for label in batchLabels:
+        carStats[label, 4] += 1
+
+    #Loop through all correct predictions incrementing the label correct count by 1 in car stats
+    for index in correctIndices:
+        carStats[batchLabels[index], 2] += 1
+
+    #Loop through all top 5 correct predictions incrementing the label top 5 correct count by 1 in car stats
+    for index in top5CorrectIndices:
+        carStats[batchLabels[index], 3] += 1
+    return carStats
+
+
+#Name:          printClassStats
+#Purpose:       print the most / least accurate classes as well as the most / least accurate top 5 classes
+#Inputs:        carStats -> numpy array of stats per label type [label, labelName, accuracyTop1, accuracyTop5, total]
+#               printCount -> number of top / least classes to print
+#Output:        none -> just prints results
+def printClassStats(carStats, printCount):
+    #Sort by ascending accuracy in terms of order
+    topPredictedAccuracy = carStats[carStats[:,2].argsort()][:,1:3]
+    top5PredictedAccuracy = carStats[carStats[:,3].argsort()][:,[1,3]]
+
+    print("Network least accurate classes are: ")
+    print(topPredictedAccuracy[0:printCount])
+    print()
+
+    print("Network most accurate classes are: ")
+    print(topPredictedAccuracy[len(topPredictedAccuracy)-printCount:])
+    print()
+
+    print("Network least accurate top 5 prediction classes are: ")
+    print(top5PredictedAccuracy[0:printCount])
+    print()
+
+    print("Network most accurate top 5 prediction classes are: ")
+    print(top5PredictedAccuracy[len(topPredictedAccuracy)-printCount:])
+    print()
+    print()
+    print()
+    return

@@ -18,20 +18,23 @@ from utils import *
 
 #Main function
 if __name__ == '__main__':
-    #Get the model type to use, image resize shape, whether to perform fine-tuning or feature extraction, batch size, and max epochs to train for
+    #Get the model type to use, image resize shape, whether to perform fine-tuning or feature extraction, batch size, max epochs to train for, and
+    #filename to save to
     parser = argparse.ArgumentParser(description="process the command line arguments")
-    parser.add_argument("--model", type=int, default=1, help='Numerical value corresponding to the type of CNN model to train')
+    parser.add_argument("--model", type=int, default=1, help='numerical value corresponding to the type of CNN model to train')
     parser.add_argument("--resize_shape", type=int, default=224, help='image resize shape')
     parser.add_argument("--feature_extract", action='store_true', help='whether or not to perform feature extraction (false = finetune whole model; true = update reshaped layer parameters only)')
     parser.add_argument("--batch_size", type=int, default=32, help='batch size to use for training and evaluation')
     parser.add_argument("--epochs", type=int, default=5, help='max epochs to train for')
+    parser.add_argument("--name", type=str, required=True, help='filename to save model to')
     args = parser.parse_args()
 
-    #Create label dictionaries for both the training and test datasets
+    #Create label dictionaries for both the training and test datasets and get all label names
     trainLabels = getLabels("data/car_devkit/devkit/cars_train_annos.mat")
     trainLabels = buildLabelDictionary(trainLabels)
     testLabels = getLabels("data/car_devkit/devkit/cars_test_annos_withlabels.mat")
     testLabels = buildLabelDictionary(testLabels)
+    labelNames = getLabelNames()
 
     #Create the dataset / dataloader for both the training and test data
     trainDataset = CarDataset("data/cars_train", args.resize_shape)
@@ -63,24 +66,38 @@ if __name__ == '__main__':
     for epochIndex in range(args.epochs):
         #Train the network over the training set and test over the test set
         NN, trainLoss, trainAccuracy, trainTop5Accuracy = train(GPU, NN, trainDataloader, trainLabels, criterion, optimizer, args.batch_size)
-        testLoss, testAccuracy, testTop5Accuracy = test(GPU, NN, testDataloader, testLabels, criterion, args.batch_size)
+        testLoss, testAccuracy, testTop5Accuracy, _ = test(GPU, NN, testDataloader, testLabels, labelNames, criterion, args.batch_size)
 
         #Print the training / testing stats from the epoch
         print("                                                                                             ", end="\r")
         print("Epoch: "+str(epochIndex))
-        print("Training loss: "+str(trainLoss)+" --- Training accuracy: "+str(trainAccuracy)+" --- Training top 5 accuracy"+str(trainTop5Accuracy))
-        print("Testing loss: "+str(testLoss)+" --- Testing accuracy: "+str(testAccuracy)+" --- Testing top 5 accuracy"+str(testTop5Accuracy))
+        print("Training loss: "+str(trainLoss)+" --- Training accuracy: "+str(trainAccuracy)+" --- Training top 5 accuracy: "+str(trainTop5Accuracy))
+        print("Testing loss: "+str(testLoss)+" --- Testing accuracy: "+str(testAccuracy)+" --- Testing top 5 accuracy: "+str(testTop5Accuracy))
         print()
 
         #Save the training / testing results from the epoch
-        saveResults(averageLossTrain, trainLoss, epochIndex, "trainLoss")
-        saveResults(accuracyTrain, trainAccuracy, epochIndex, "trainAccuracy")
-        saveResults(accuracyTrain5, trainTop5Accuracy, epochIndex, "trainTop5Accuracy")
-        saveResults(averageLossTest, testLoss, epochIndex, "testLoss")
-        saveResults(accuracyTest, testAccuracy, epochIndex, "testAccuracy")
-        saveResults(accuracyTest5, testTop5Accuracy, epochIndex, "testTop5Accuracy")
+        saveResults(averageLossTrain, trainLoss, epochIndex)
+        saveResults(accuracyTrain, trainAccuracy, epochIndex)
+        saveResults(accuracyTrain5, trainTop5Accuracy, epochIndex)
+        saveResults(averageLossTest, testLoss, epochIndex)
+        saveResults(accuracyTest, testAccuracy, epochIndex)
+        saveResults(accuracyTest5, testTop5Accuracy, epochIndex)
 
         #Save the model only if test set accuracy has improved
         if(testAccuracy > testAccuracyBest):
-            torch.save(NN.state_dict(), "NN.pt")
+            torch.save({
+                'model_state_dict': NN.state_dict(),
+                'model': args.model,
+                'resize_shape': args.resize_shape},
+                args.name+".pt")
             testAccuracyBest = testAccuracy
+
+    #Save the final training / testing results per epoch to disk
+    torch.save({
+        'average_loss_train': averageLossTrain,
+        'accuracy_train': accuracyTrain,
+        'accuracy_train_5': accuracyTrain5,
+        'average_loss_test': averageLossTest,
+        'accuracy_test': accuracyTest,
+        'accuracy_test_5': accuracyTest5},
+        args.name+"_stats.pt")
