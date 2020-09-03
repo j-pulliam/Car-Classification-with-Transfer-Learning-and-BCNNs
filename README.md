@@ -87,3 +87,28 @@ Additional parameters are "resize_shape", "feature_extract", "batch_size", "epoc
 * batch_size: Batch size to use while training. Must be a positive integer and it is recommended to use a power of 2 as this will scale the best to GPU hardware. If a "CUDA out of memory" error occurs reduce this value. To check GPU resource consumption run "watch nvidia-smi" at the command line (default=32).  
 * epochs: Number of epochs to train for. In the attached report models were trained for 100 epochs or until over-fitting occurred (default=5)
 * name: Filename to save the model and training stats to. The model will be saved to a file named "name.pt" while the training stats will be saved to "name_stats.pt". This parameter is required.   
+
+## Evaluating a trained CNN over the dataset
+To evaluate the performance of a trained CNN over the training and test datasets run the following command:
+```
+python test_cnn.py --model <string> --batch_size <int> --print_count <int>
+```
+
+The parameters for this command are "model", "batch_size", and "print_count". These parameters serve the following purpose:
+* model: Filename of the trained model to evaluate. This should be the same as the "name" parameter used when executing "main_cnn.py" with ".pt" added to the end. This parameter is required.
+* batch_size: Batch size to use while evaluating performance. Must be a positive integer and it is recommended to use a power of 2 as this will scale the best to GPU hardware. If a "CUDA out of memory" error occurs reduce this value. To check GPU resource consumption run "watch nvidia-smi" at the command line (default=32).  
+* print_count: Number of best / worst classes to output in terms of the model's accuracy score across images of this type.
+
+## Evaluating an ensemble of trained CNNs over the dataset
+To evaluate the performance of an ensemble of trained CNNs (3) over the training and test datasets run the following command:
+```
+python test_ensemble.py --model1 <string> --model2 <string> --model3 <string> --batch_size <int> --print_count <int> --GPU
+```
+
+The parameters for this command are "model1", "model2", "model3", "batch_size", "print_count", and "GPU". These parameters serve the following purpose:
+* model1: Filename of the first trained model to use in the ensemble. This should be the same as the "name" parameter used when executing "main_cnn.py" with ".pt" added to the end. This parameter is required.
+* model2: Filename of the second trained model to use in the ensemble. See above.
+* model3: Filename of the third trained model to use in the ensemble. See above.
+* batch_size: Batch size to use while evaluating performance. Must be a positive integer and it is recommended to use a power of 2 as this will scale the best to GPU hardware. If a "CUDA out of memory" error occurs reduce this value. To check GPU resource consumption run "watch nvidia-smi" at the command line (default=32).  
+* print_count: Number of best / worst classes to output in terms of the model's accuracy score across images of this type.
+* GPU: If this parameter is used GPU hardware will be utilized (if available) for evaluation; otherwise models and data will remain on the CPU for processing. Note that since multiple models are sent to the GPU it may be necessary to reduce the "batch_size" to avoid receiving a "CUDA out of memory" error.   
