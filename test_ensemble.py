@@ -23,9 +23,9 @@ from utils import *
 #               dataset -> PyTorch dataloader class
 #               labels -> dictionary of file names and their corresponding labels in a dataset
 #               batchSize -> batch size for testing
-#Output:        loss -> average loss across the test set
-#               accuracy -> accuracy across the test set
+#Output:        accuracy -> accuracy across the test set
 #               top5Accuracy -> top 5 accuracy across the test set
+#               carStats -> numpy array of stats per label type [label, labelName, accuracyTop1, accuracyTop5, total]
 def testEnsemble(GPU, NN1, NN2, NN3, dataset, labels, batchSize):
     #Place the networks in evaluation mode
     NN1.eval()

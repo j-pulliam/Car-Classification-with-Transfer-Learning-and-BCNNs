@@ -123,12 +123,12 @@ class BCNN(nn.Module):
 
     #Name:          forward
     #Purpose:       forward pass through the BCNN
-    #Inputs:        X -> network input
+    #Input:         X -> network input
     #Output:        X -> network output
     def forward(self, X):
         #Get the batch size being used
         batchSize = X.size()[0]
-        #Pass the image through individual CNNs extarcting features
+        #Pass the image through individual CNNs extracting features
         X1 = self.features1(X)
         X2 = self.features2(X)
         #Reshape for batch matrix multiplication

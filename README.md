@@ -132,7 +132,7 @@ Additional parameters are "resize_shape", "feature_extract", "batch_size", "epoc
 * resize_shape: Specifies the size to reshape dataset images to for classification. Note that this should be either 224 or 448 corresponding to images of size [224x224] and [448x448] (default=224).
 * feature_extract: If this parameter is used feature extraction will be performed where only the top classification layer's weights are modified. Otherwise all network weights will be adjusted with fine-tuning. [For more information on the differences between feature extraction and fine-tuning](https://stats.stackexchange.com/questions/255364/fine-tuning-vs-joint-training-vs-feature-extraction#:~:text=You%20train%20a%20model%20on,it%20on%20a%20new%20dataset.).
 * batch_size: Batch size to use while training. Must be a positive integer and it is recommended to use a power of 2 as this will scale the best to GPU hardware. If a "CUDA out of memory" error occurs reduce this value. To check GPU resource consumption run "watch nvidia-smi" at the command line (default=32).  
-* epochs: Number of epochs to train for. In the attached report models were trained for 20 epochs or until over-fitting occurred (default=5)
+* epochs: Number of epochs to train for. In the attached report models were trained for 100 epochs or until over-fitting occurred (default=5)
 * name: Filename to save the model and training stats to. The model will be saved to a file named "name.pt" while the training stats will be saved to "name_stats.pt". This parameter is required.   
 
 ## Evaluating a trained BCNN over the dataset

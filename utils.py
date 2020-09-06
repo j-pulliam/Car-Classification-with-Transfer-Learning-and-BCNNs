@@ -20,7 +20,7 @@ from torchvision import models
 #               criterion -> PyTorch criterion (such as cross entropy loss)
 #               optimizer -> PyTorch optimizer (such as SGD / Adam)
 #               batchSize -> batch size for training
-#Output:        NN -> PyTorch neural network post training
+#Outputs:       NN -> PyTorch neural network post training
 #               loss -> average loss across the training run
 #               accuracy -> accuracy across the training run
 #               top5Accuracy -> top 5 accuracy across the training run
@@ -68,7 +68,7 @@ def train(GPU, NN, dataset, labels, criterion, optimizer, batchSize):
 #               labelNames -> all label names from the dataset
 #               criterion -> PyTorch criterion (such as cross entropy loss)
 #               batchSize -> batch size for testing
-#Output:        loss -> average loss across the test set
+#Outputs:       loss -> average loss across the test set
 #               accuracy -> accuracy across the test set
 #               top5Accuracy -> top 5 accuracy across the test set
 #               carStats -> numpy array of stats per label type [label, labelName, accuracyTop1, accuracyTop5, total]
@@ -115,7 +115,7 @@ def test(GPU, NN, dataset, labels, labelNames, criterion, batchSize):
 
 #Name:          getLabels
 #Purpose:       load all image files from the dataset and their corresponding labels
-#Inputs:        path -> path to the metadata file
+#Input:         path -> path to the metadata file
 #Output:        labels -> all image names and their corresponding labels from the dataset
 def getLabels(path):
     #Load the training files and labels, get the number of files, and initialize a numpy array to
@@ -138,7 +138,7 @@ def getLabels(path):
 
 #Name:          getLabelNames
 #Purpose:       load all labels from the dataset
-#Inputs:        none
+#Input:         none
 #Output:        labelNames -> all label names from the dataset
 def getLabelNames():
     #Load the label names, get the number of labels, and initialize a numpy array to store all labels
@@ -159,7 +159,7 @@ def getLabelNames():
 
 #Name:          buildLabelDictionary
 #Purpose:       transform the file name with label array to a dictionary
-#Inputs:        trainLabels -> numpy array with file names and their corresponding labels from the dataset
+#Input:         trainLabels -> numpy array with file names and their corresponding labels from the dataset
 #Output:        dictionary -> dictionary of file names and their corresponding labels in a dataset
 def buildLabelDictionary(trainLabels):
     dictionary = {}
@@ -211,7 +211,7 @@ def createModel(model, feature_extract):
         set_parameter_requires_grad(NN, feature_extract)
         NN.fc = nn.Linear(2048, 196)
     #Load in Resnet152
-    elif(model == 8):
+    elif(model == 7):
         NN = models.resnet152(pretrained=True)
         set_parameter_requires_grad(NN, feature_extract)
         NN.fc = nn.Linear(2048, 196)

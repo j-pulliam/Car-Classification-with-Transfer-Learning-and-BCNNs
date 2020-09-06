@@ -16,22 +16,22 @@ class CarDataset(Dataset):
     #Name:          __init__
     #Purpose:       initialize the class variables for the dataset
     #Inputs:        root_dir -> directory containing the dataset files
-    #               resizeShape -> resize value of an image
-    #Output:       none
+    #               resizeShape -> image resize shape
+    #Output:        none
     def __init__(self, root_dir, resizeShape):
         self.root_dir = root_dir
         self.resizeShape = resizeShape
 
     #Name:          __len__
     #Purpose:       get the number of images in the dataset
-    #Inputs:        none
-    #Output:       counter -> number of images in the dataset
+    #Input:         none
+    #Output:        counter -> number of images in the dataset
     def __len__(self):
         return len(os.listdir(self.root_dir))
 
     #Name:          __getitem__
     #Purpose:       load a random image from the dataset
-    #Inputs:        idx -> random index value of the image to load
+    #Input:         idx -> random index value of the image to load
     #Outputs:       image -> image
     #               imageName -> image name
     def __getitem__(self, idx):
