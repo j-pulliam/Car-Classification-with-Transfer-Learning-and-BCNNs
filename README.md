@@ -1,7 +1,7 @@
 # Fine-Grained Car Make and Model Classification with Transfer Learning and BCNNs
 In this project we explore fine-grained car make and model classification on the Stanford Cars Dataset. We first experiment with fine-tuning some of the more famous CNN architectures such as VGG, Resnet, and Densenet. After doing this analysis we build various structured ensembles of these fine-tuned models and analyze how they are able to support each other during classification. Finally we explore the concept of bilinear convolutional neural networks (BCNNs) which take into consideration not only spatial locality within images but also feature location.
 
-This project was created as the final for [10-707 Topics in Deep Learning](https://deeplearning-cmu-10707.github.io/) at [Carnegie Mellon University](https://www.cmu.edu/) under the instruction of [Ruslan Salakhutdinov](https://www.cs.cmu.edu/~rsalakhu/) in collaboration with Hashim Saeed.  
+This project was created as the final for [10-707 Topics in Deep Learning](https://deeplearning-cmu-10707.github.io/) at [Carnegie Mellon University](https://www.cmu.edu/) under the instruction of [Ruslan Salakhutdinov](https://www.cs.cmu.edu/~rsalakhu/). The final report is located in the "report" folder of this repository.  
 
 ## Dataset Download
 Due to space constraints the dataset has not been included in this repository as it is ~2GB in size. The Stanford Cars Dataset can be downloaded at the following [link](https://ai.stanford.edu/~jkrause/cars/car_dataset.html). To download this data please scroll to the "Download" section and click on the following series of links:
