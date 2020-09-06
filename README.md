@@ -37,13 +37,14 @@ conda install matplotlib
 ```
 
 ## Repo breakdown
-This repository consists of 9 files and 1 folder. The 9 files are as follows:
-* bcnnMain.py:
-* bcnnModel.py:
+This repository consists of 11 files and 1 folder. The 9 files are as follows:
 * dataset.py: PyTorch dataset class definition.
 * display_training_stats.py: Displays the stats from training in a graph.
 * label_names.py: Prints all car labels in the dataset.
+* main_bcnn.py: Trains a BCNN over the dataset for a set number of epochs evaluating performance over the test set after each.
 * main_cnn.py: Trains a CNN over the dataset for a set number of epochs evaluating performance over the test set after each.
+* model_bcnn.py: BCNN PyTorch class definition
+* test_bcnn.py: Evaluates the final performance of a trained BCNN over both the training and test sets.
 * test_cnn.py: Evaluates the final performance of a trained CNN over both the training and test sets.
 * test_ensemble.py: Evaluates the performance of an ensemble of three trained CNNs over both the training and test sets.
 * utils.py: Utility functions called by numerous files.
@@ -112,3 +113,35 @@ The parameters for this command are "model1", "model2", "model3", "batch_size", 
 * batch_size: Batch size to use while evaluating performance. Must be a positive integer and it is recommended to use a power of 2 as this will scale the best to GPU hardware. If a "CUDA out of memory" error occurs reduce this value. To check GPU resource consumption run "watch nvidia-smi" at the command line (default=32).  
 * print_count: Number of best / worst classes to output in terms of the model's accuracy score across images of this type.
 * GPU: If this parameter is used GPU hardware will be utilized (if available) for evaluation; otherwise models and data will remain on the CPU for processing. Note that since multiple models are sent to the GPU it may be necessary to reduce the "batch_size" to avoid receiving a "CUDA out of memory" error.   
+
+## Training a BCNN over the dataset
+To train (finetune / feature extraction) a BCNN over the dataset and evaluate the performance over the test set after each epoch run the following command:
+```
+python main_bcnn.py --model1 <int> --model2 <int> --resize_shape <int> --feature_extract --batch_size <int> --epochs <int> --name <string>
+```
+
+The "model1" and "model2" parameters must be integers between 1 and 6. These specify the types of pre-trained CNN architectures to use for each model of the BCNN. It recommended to use different model types for each. This directly makes use of [PyTorch's torchvision models](https://pytorch.org/docs/stable/torchvision/models.html) with options being as follows:
+* [VGG11](https://arxiv.org/abs/1409.1556)
+* [VGG11_BN](https://arxiv.org/abs/1409.1556)
+* [VGG16](https://arxiv.org/abs/1409.1556)
+* [VGG16_BN](https://arxiv.org/abs/1409.1556)
+* [Resnet50](https://arxiv.org/abs/1512.03385)
+* [Resnet152](https://arxiv.org/abs/1512.03385)
+
+Additional parameters are "resize_shape", "feature_extract", "batch_size", "epochs", and "name". These parameters serve the following purpose:
+* resize_shape: Specifies the size to reshape dataset images to for classification. Note that this should be either 224 or 448 corresponding to images of size [224x224] and [448x448] (default=224).
+* feature_extract: If this parameter is used feature extraction will be performed where only the top classification layer's weights are modified. Otherwise all network weights will be adjusted with fine-tuning. [For more information on the differences between feature extraction and fine-tuning](https://stats.stackexchange.com/questions/255364/fine-tuning-vs-joint-training-vs-feature-extraction#:~:text=You%20train%20a%20model%20on,it%20on%20a%20new%20dataset.).
+* batch_size: Batch size to use while training. Must be a positive integer and it is recommended to use a power of 2 as this will scale the best to GPU hardware. If a "CUDA out of memory" error occurs reduce this value. To check GPU resource consumption run "watch nvidia-smi" at the command line (default=32).  
+* epochs: Number of epochs to train for. In the attached report models were trained for 20 epochs or until over-fitting occurred (default=5)
+* name: Filename to save the model and training stats to. The model will be saved to a file named "name.pt" while the training stats will be saved to "name_stats.pt". This parameter is required.   
+
+## Evaluating a trained BCNN over the dataset
+To evaluate the performance of a trained BCNN over the training and test datasets run the following command:
+```
+python test_bcnn.py --model <string> --batch_size <int> --print_count <int>
+```
+
+The parameters for this command are "model", "batch_size", and "print_count". These parameters serve the following purpose:
+* model: Filename of the trained model to evaluate. This should be the same as the "name" parameter used when executing "main_bcnn.py" with ".pt" added to the end. This parameter is required.
+* batch_size: Batch size to use while evaluating performance. Must be a positive integer and it is recommended to use a power of 2 as this will scale the best to GPU hardware. If a "CUDA out of memory" error occurs reduce this value. To check GPU resource consumption run "watch nvidia-smi" at the command line (default=32).  
+* print_count: Number of best / worst classes to output in terms of the model's accuracy score across images of this type.

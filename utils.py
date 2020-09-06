@@ -52,6 +52,7 @@ def train(GPU, NN, dataset, labels, criterion, optimizer, batchSize):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        print("                                                                                             ", end="\r")
         print("Training batch index: "+str(batchNumber)+"/"+str(len(dataset))+ " ( "+str(batchNumber/len(dataset)*100)+"% )", end="\r")
 
     #Return the updated network, average loss, top prediction accuracy, and top 5 prediction accuracy
@@ -396,4 +397,15 @@ def printClassStats(carStats, printCount):
     print()
     print()
     print()
+    return
+
+
+#Name:          checkResizeShape
+#Purpose:       checks that the image resize shape is either [224x224] or [448x448] as these are the only shapes applicable to the BCNN
+#Input:         resizeShape -> image resize shape
+#Output:        none -> just checks image resize shape
+def checkResizeShape(resizeShape):
+    if((resizeShape != 224) and (resizeShape != 448)):
+        print("Error! Resize shape must be either 224 or 448 corresponding to [224x224] or [448x448]")
+        exit()
     return
