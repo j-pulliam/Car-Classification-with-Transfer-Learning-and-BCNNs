@@ -72,15 +72,15 @@ python main_cnn.py --model <int> --resize_shape <int> --feature_extract --batch_
 ```
 
 The "model" parameter must be an integer between 1 and 9 and specifies the type of pre-trained CNN architecture to use. This directly makes use of [PyTorch's torchvision models](https://pytorch.org/docs/stable/torchvision/models.html) with options being as follow:
-* [VGG11](https://arxiv.org/abs/1409.1556)
-* [VGG11_BN](https://arxiv.org/abs/1409.1556)
-* [VGG16](https://arxiv.org/abs/1409.1556)
-* [VGG16_BN](https://arxiv.org/abs/1409.1556)
-* [Resnet18](https://arxiv.org/abs/1512.03385)
-* [Resnet50](https://arxiv.org/abs/1512.03385)
-* [Resnet152](https://arxiv.org/abs/1512.03385)
-* [Densenet161](https://arxiv.org/abs/1608.06993)
-* [Alexnet](https://arxiv.org/abs/1404.5997)
+* 1: [VGG11](https://arxiv.org/abs/1409.1556)
+* 2: [VGG11_BN](https://arxiv.org/abs/1409.1556)
+* 3: [VGG16](https://arxiv.org/abs/1409.1556)
+* 4: [VGG16_BN](https://arxiv.org/abs/1409.1556)
+* 5: [Resnet18](https://arxiv.org/abs/1512.03385)
+* 6: [Resnet50](https://arxiv.org/abs/1512.03385)
+* 7: [Resnet152](https://arxiv.org/abs/1512.03385)
+* 8: [Densenet161](https://arxiv.org/abs/1608.06993)
+* 9: [Alexnet](https://arxiv.org/abs/1404.5997)
 
 Additional parameters are "resize_shape", "feature_extract", "batch_size", "epochs", and "name". These parameters serve the following purpose:
 * resize_shape: Specifies the size to reshape dataset images to for classification. Note that this should be a positive integer and not all values will work; it is recommended to keep this at the default value (default=224).
@@ -121,12 +121,12 @@ python main_bcnn.py --model1 <int> --model2 <int> --resize_shape <int> --feature
 ```
 
 The "model1" and "model2" parameters must be integers between 1 and 6. These specify the types of pre-trained CNN architectures to use for each model of the BCNN. It recommended to use different model types for each. This directly makes use of [PyTorch's torchvision models](https://pytorch.org/docs/stable/torchvision/models.html) with options being as follow:
-* [VGG11](https://arxiv.org/abs/1409.1556)
-* [VGG11_BN](https://arxiv.org/abs/1409.1556)
-* [VGG16](https://arxiv.org/abs/1409.1556)
-* [VGG16_BN](https://arxiv.org/abs/1409.1556)
-* [Resnet50](https://arxiv.org/abs/1512.03385)
-* [Resnet152](https://arxiv.org/abs/1512.03385)
+* 1: [VGG11](https://arxiv.org/abs/1409.1556)
+* 2: [VGG11_BN](https://arxiv.org/abs/1409.1556)
+* 3: [VGG16](https://arxiv.org/abs/1409.1556)
+* 4: [VGG16_BN](https://arxiv.org/abs/1409.1556)
+* 5: [Resnet50](https://arxiv.org/abs/1512.03385)
+* 6: [Resnet152](https://arxiv.org/abs/1512.03385)
 
 Additional parameters are "resize_shape", "feature_extract", "batch_size", "epochs", and "name". These parameters serve the following purpose:
 * resize_shape: Specifies the size to reshape dataset images to for classification. Note that this should be either 224 or 448 corresponding to images of size [224x224] and [448x448] (default=224).
